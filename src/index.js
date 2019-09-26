@@ -1,148 +1,92 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
+//import { readConfig } from 'jest-config';
+
 //import './index.css';
 
-function Square(props) {
-  return (
-    <button className="square" onClick={props.onClick}>
-      {props.value}
-    </button>
-  );
-}
-
-class Board extends React.Component {
-  renderSquare(i) {
-    return (
-      <Square
-        value={this.props.squares[i]}
-        onClick={() => this.props.onClick(i)}
-      />
-    );
-  }
-
-  render() {
-    return (
-      <div>
-        <div className="board-row">
-          {this.renderSquare(0)}
-          {this.renderSquare(1)}
-          {this.renderSquare(2)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(3)}
-          {this.renderSquare(4)}
-          {this.renderSquare(5)}
-        </div>
-        <div className="board-row">
-          {this.renderSquare(6)}
-          {this.renderSquare(7)}
-          {this.renderSquare(8)}
-        </div>
-      </div>
-    );
-  }
-}
-
-class Game extends React.Component {
+class Bet extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      history: [
-        {
-          squares: Array(9).fill(null)
-        }
-      ],
-      stepNumber: 0,
-      xIsNext: true
+      num_bet_one: null,
+      num_bet_two: null,
+      num_bet_three: null,
+      num_bet_four: null,
+      num_bet_five: null,
+      num_bet_six: null
     };
+    this.handleInputChange = this.handleInputChange.bind(this);
   }
 
-  handleClick(i) {
-    const history = this.state.history.slice(0, this.state.stepNumber + 1);
-    const current = history[history.length - 1];
-    const squares = current.squares.slice();
-    if (calculateWinner(squares) || squares[i]) {
-      return;
-    }
-    squares[i] = this.state.xIsNext ? "X" : "O";
-    this.setState({
-      history: history.concat([
-        {
-          squares: squares
-        }
-      ]),
-      stepNumber: history.length,
-      xIsNext: !this.state.xIsNext
-    });
-  }
+  handleInputChange(event) {
+    const target = event.target;
+    const value = target.value;
+    const name = target.name;
 
-  jumpTo(step) {
     this.setState({
-      stepNumber: step,
-      xIsNext: (step % 2) === 0
+      [name]: value
     });
   }
 
   render() {
-    const history = this.state.history;
-    const current = history[this.state.stepNumber];
-    const winner = calculateWinner(current.squares);
-
-    const moves = history.map((step, move) => {
-      const desc = move ?
-        'Go to move #' + move :
-        'Go to game start';
-      return (
-        <li key={move}>
-          <button onClick={() => this.jumpTo(move)}>{desc}</button>
-        </li>
-      );
-    });
-
-    let status;
-    if (winner) {
-      status = "Winner: " + winner;
-    } else {
-      status = "Next player: " + (this.state.xIsNext ? "X" : "O");
-    }
-
     return (
-      <div className="game">
-        <div className="game-board">
-          <Board
-            squares={current.squares}
-            onClick={i => this.handleClick(i)}
-          />
-        </div>
-        <div className="game-info">
-          <div>{status}</div>
-          <ol>{moves}</ol>
-        </div>
-      </div>
+      <from>
+        <label>
+          Num_one:
+          <input
+            name="num_bet_one"
+            type="number"
+            value={this.state.num_bet_one}
+            onChange={this.handleInputChange} />
+        </label>
+        <label>
+          Num_two:
+        <input
+            name="num_bet_two"
+            type="number"
+            value={this.state.num_bet_two}
+            onChange={this.handleInputChange} />
+        </label>
+        <label>
+          Num_three:
+        <input
+            name="num_bet_three"
+            type="number"
+            value={this.state.num_bet_three}
+            onChange={this.handleInputChange} />
+        </label>
+        <label>
+          Num_four:
+        <input
+            name="num_bet_four"
+            type="number"
+            value={this.state.num_bet_four}
+            onChange={this.handleInputChange} />
+        </label>
+        <label>
+          Num_five:
+        <input
+            name="num_bet_five"
+            type="number"
+            value={this.state.num_bet_five}
+            onChange={this.handleInputChange} />
+        </label>
+        <label>
+          Num_six:
+        <input
+            name="num_bet_six"
+            type="number"
+            value={this.state.num_bet_six}
+            onChange={this.handleInputChange} />
+        </label>
+      </from>
     );
   }
 }
 
 // ========================================
 
-ReactDOM.render(<Game />, document.getElementById("root"));
-
-function calculateWinner(squares) {
-  const lines = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
-  ];
-  for (let i = 0; i < lines.length; i++) {
-    const [a, b, c] = lines[i];
-    if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
-      return squares[a];
-    }
-  }
-  return null;
-}
+ReactDOM.render(
+  <Bet />,
+  document.getElementById("root")
+);
