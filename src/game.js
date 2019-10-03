@@ -9,32 +9,24 @@ export default class Bet extends React.Component {
     constructor(props) {
         super(props);
         this.state = {
-            sum: 1,
-            NumberOfWins: 0,
-            numBet: Array(BET_AMOUNT).fill(1),
-            output: [],
-            winningCount: Array(BET_AMOUNT).fill(0),
+            numBet: [1, 2, 3, 4, 5, 6],
+            winCount: Array(BET_AMOUNT).fill(0),
+            outputData: [],
+            outputDataStore: [],
             runTime: 1,
+            winNumSum: 0,
+            sum: 1,
         };
     }
 
-    quickPick = () => {
-        let num = []
-        while (num.length < BET_AMOUNT) {
-            let temp = getRandom(MIN_WIN_NUM, MAX_WIN_NUM)
-            if (!hasDuplicate(num.concat(temp))) { num.push(temp) }
-        }
-        this.setState({ numBet: num })
-    }
-
-    handleInputChange = (event) => {
+    handleNumBetChange = (event) => {
         let value = +event.target.value
         let id = event.target.id
         let newNumBet = [...this.state.numBet]
         if (value > 0 && value < 50) {
             newNumBet[id] = value
         }
-        else if (value === 0) {
+        else {
             newNumBet[id] = ""
         }
         this.setState({ numBet: newNumBet })
@@ -42,82 +34,70 @@ export default class Bet extends React.Component {
 
     handleRunTimeChange = (event) => {
         let value = +event.target.value
-        let newNumBet = 0
-        if (value > 0 && value < 1001) {
-            newNumBet = value
+        let newRunTime = 0
+        if (value > 0 && value < 100001) {
+            newRunTime = value
         }
         else {
-            newNumBet = 0
+            newRunTime = ""
         }
-        this.setState({ runTime: newNumBet })
+        this.setState({ runTime: newRunTime })
+    }
+
+    quickPick = () => {
+        this.setState({ numBet: getRandomGroup() })
     }
 
     submit = () => {
-        const newOutput = [...this.state.output]
-        const newWinningCount = [...this.state.winningCount]
+        let newOutputDataStore = [...this.state.outputDataStore]
+        let newWinCount = [...this.state.winCount]
+        let newOutputData = [...this.state.outputData]
+        let newSum = this.state.sum
         console.time('start')
         for (let i = 0; i < this.state.runTime; i++) {
+            let result = this.matchPrizeNum(this.state.numBet)
+            const resultData = [result.betNum, result.prizeNum, result.matchingNum]
+            if (!result) return
 
-            let result = this.calculation(this.state.numBet)
-            if (result == null) {
-                return
-            }
-            else {
-                newWinningCount[result.same.length - 1]++
-                newOutput.unshift(
-                    <tr key={newOutput.length - 1}>
-                        <td>
-                            {newOutput.length + 1}
-                        </td>
-                        <td>
-                            {this.zorePadding(result.bet).sort((a, b) => { return a - b }).map((v, i) => <button key={i} className="ball">{v}</button>)}
-                        </td>
-                        <td>
-                            {this.zorePadding(result.winning).sort((a, b) => { return a - b }).map((v, i) => <button key={i} className="ball">{v}</button>)}
-                        </td>
-                        <td>
-                            {result.same.map((v, i) => <button key={i} className="ball">{v}</button>)}
-                        </td>
-                    </tr>
-                )
-            }
+            if (newOutputData.length > 9) newOutputData.pop()
+            let sum = newOutputDataStore.length
+            let betNum = result.betNum
+            let prizeNum = result.prizeNum
+            let matchingNum = result.matchingNum
+            newOutputDataStore.push({ sum, betNum, prizeNum, matchingNum })
+            newOutputData.unshift(
+                <tr key={newSum}>
+                    <td>{newSum}</td>
+                    {resultData.map((V, I) => <td key="I"> {V.map((v, i) => <button key={i} className="ball">{v}</button>)}</td>)}
+                </tr>
+            )
+            newSum++
+            newWinCount[result.matchingNum.length - 1]++
         }
         console.timeEnd("start")
         let winningSum = 0
-        newWinningCount.map((v, i) => winningSum += v)
+        newWinCount.map((v, i) => winningSum += v)
+
         this.setState({
-            output: newOutput,
-            sum: newOutput.length,
-            winningCount: newWinningCount,
-            NumberOfWins: winningSum
+            outputDataStore: newOutputDataStore,
+            winCount: newWinCount,
+            winNumSum: winningSum,
+            outputData: newOutputData,
+            sum: newSum
         })
     }
 
-    calculation = (numBet) => {
-        let winningNum = []
-        for (let i = 0; i < numBet.length; i++) {
-            if (numBet[i] === "") {
-                alert("Don't input the empty")
-                return null
-            }
-        }
+    matchPrizeNum = (numBet) => {
         if (hasDuplicate(numBet)) {
             alert("Repeat input the numbers")
-            return null
+            return
         }
-        while (winningNum.length < BET_AMOUNT) {
-            let temp = getRandom(MIN_WIN_NUM, MAX_WIN_NUM)
-            winningNum.push(temp)
-            if (hasDuplicate(winningNum)) { winningNum.pop() }
-        }
-        winningNum.sort((a, b) => { return a - b })
-
-        const winNum = countDuplicateNums(numBet, winningNum)
-
+        let prizeNum = getRandomGroup().sort((a, b) => { return a - b })
+        const matchingNum = countDuplicateNums(numBet, prizeNum)
         return {
-            bet: numBet,
-            winning: winningNum,
-            same: winNum,
+            betNum: this.zorePadding(numBet).sort((a, b) => { return a - b }),
+            prizeNum: this.zorePadding(prizeNum).sort((a, b) => { return a - b }),
+            matchingNum: this.zorePadding(matchingNum).sort((a, b) => { return a - b }),
         }
     }
 
@@ -133,27 +113,31 @@ export default class Bet extends React.Component {
     }
 
     clear = () => {
-        let empty = []
-        this.setState({ output: empty, sum: 1, NumberOfWins: 0, winningCount: Array(BET_AMOUNT).fill(0), runTime: 1 })
+        this.setState({
+            outputDataStore: [],
+            outputData: [],
+            winNumSum: 0,
+            winCount: Array(BET_AMOUNT).fill(0),
+            runTime: 1,
+            sum: 1
+        })
     }
 
     render() {
         return (
             <div>
                 <h1>Lotto Game</h1>
-                <div class="container">
+                <div className="container">
                     <div>
                         <Bets
                             state={this.state}
-                            handleInputChange={this.handleInputChange}
+                            handleNumBetChange={this.handleNumBetChange}
                         />
-                        <div key="1" >
-                            Run time :
+                        Run time :
                             <input
-                                type="number"
-                                value={this.state.runTime}
-                                onChange={this.handleRunTimeChange} />
-                        </div >
+                            type="number"
+                            value={this.state.runTime}
+                            onChange={this.handleRunTimeChange} />
                         <br />
                         <button className="button" onClick={this.submit}>
                             run
@@ -169,8 +153,8 @@ export default class Bet extends React.Component {
                         <ResultTable state={this.state} />
                     </div>
                     <div>
-                        SUM = {this.state.output.length} Winnging Rate = {(this.state.NumberOfWins / this.state.sum).toFixed(2)}
-                        {this.state.winningCount.map((v, i) => <div key={i} >Win {i + 1} ={v} Winnging Rate = {(v / this.state.sum).toFixed(6)} </div>)}
+                        SUM = {this.state.sum} Win Rate = {(this.state.winNumSum / this.state.sum).toFixed(6)}
+                        {this.state.winCount.map((v, i) => <div key={i}> Win {i + 1} = {v} Win Rate = {(v / this.state.sum).toFixed(6)}</div>)}
                     </div>
                 </div>
             </div>
@@ -180,16 +164,17 @@ export default class Bet extends React.Component {
 // ========================================
 
 function Bets(props) {
-    const { state, handleInputChange } = props
-    return state.numBet.map((v, i) =>
+    const { state, handleNumBetChange } = props
+    return state.numBet.map((v, i) => (
         <div key={i} >
             Num_{i + 1} :
                 <input
                 id={i}
                 type="number"
                 value={v}
-                onChange={handleInputChange} />
-        </div >
+                onChange={handleNumBetChange} />
+        </div>
+    )
     )
 }
 
@@ -200,18 +185,23 @@ function ResultTable(props) {
         <table>
             <thead>
                 <tr>
-                    {buttonName.map((v, _) => <td>{v}</td>)}
+                    {buttonName.map((v, i) => <td key={i}>{v}</td>)}
                 </tr>
             </thead>
             <tbody>
-                {state.output.slice(0, 10).map((v, _) => v)}
+                {state.outputData.map((v, _) => v)}
             </tbody>
-        </table >
+        </table>
     )
 }
 
-function getRandom(min, max) {
-    return Math.floor(Math.random() * (max - min + 1)) + min
+function getRandomGroup() {
+    let newNum = []
+    while (newNum.length < BET_AMOUNT) {
+        let temp = Math.floor(Math.random() * (MAX_WIN_NUM - MIN_WIN_NUM + 1)) + MIN_WIN_NUM
+        if (!hasDuplicate(newNum.concat(temp))) { newNum.push(temp) }
+    }
+    return newNum
 }
 
 function hasDuplicate(numA) {
