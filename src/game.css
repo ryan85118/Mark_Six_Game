@@ -1,7 +1,74 @@
 body {
-    background: #C9FFC9;
-    font: 16px "Century Gothic", Futura, sans-serif;
+    background-color: lightblue;
+    font: 20px "Century Gothic", Futura, sans-serif;
+    margin: 1px;
+    color: white;
+  }
+h1{
+  color: white;
+  text-align: center;
+}
+table{ 
+    border:1px solid #000; 
+    font-family: 微軟正黑體; 
+    font-size:16px; 
+    width:800px;
+    text-align:center;
+    border-style:ridge;
+} 
+tr { 
+    width:500px;
+    color:#fff;
+    text-align: center;
+} 
+td { 
+    background-color:salmon;
+    padding:5px;
+    text-align: center;
+} 
+
+  .container {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+  }
+  
+  .container > div {
     margin: 10px;
-    font-size: 15px;
-    color: #FF0000;
+  }
+
+  .ball {
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    font: 16px "Century Gothic", Futura, sans-serif;
+    font-size: 1vmin;
+    border: 1px solid black;
+    border-radius: 100%;
+    border-radius: 100px;
+    background-color: yellow;
+  }
+
+  .button {
+    width: 75px;
+    height: 20px;
+    font-family: 'Roboto', sans-serif;
+    font-size: 8px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    font-weight: 1;
+    color: #000;
+    background-color: #fff;
+    border: none;
+    border-radius: 45px;
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease 0s;
+    cursor: pointer;
+    outline: none;
+    }
+  
+  .button:hover {
+    background-color: #2EE59D;
+    box-shadow: 0px 15px 20px rgba(46, 229, 157, 0.4);
+    color: #fff;
   }
